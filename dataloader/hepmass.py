@@ -3,18 +3,16 @@ Code to recreate dataset used in MAF paper.
 """
 import pandas as pd
 import numpy as np
-import gzip
-import wget
-import shutil
 import pickle
 from collections import Counter
 from os.path import join
 import os
-
+import wget
+import gzip
+import shutil
 import tensorflow as tf
 
 tfd = tf.data
-
 
 
 class Hepmass:
@@ -112,15 +110,15 @@ def download_and_make_data(datapath):
     os.makedirs(path, exist_ok=True)
     # misc.make_path(path)
     print('Downloading...')
-    # filename_train = wget.download(url_train, path)
-    # filename_test = wget.download(url_test, path)
+    filename_train = wget.download(url_train, path)
+    filename_test = wget.download(url_test, path)
     print('\nExtracting...')
-    # with gzip.open(filename_train, 'rb') as f_in:
-    #     with open(join(path, '1000_train.csv'), 'wb') as f_out:
-    #         shutil.copyfileobj(f_in, f_out)
-    # with gzip.open(filename_test, 'rb') as f_in:
-    #     with open(join(path, '1000_test.csv'), 'wb') as f_out:
-    #         shutil.copyfileobj(f_in, f_out)
+    with gzip.open(filename_train, 'rb') as f_in:
+        with open(join(path, '1000_train.csv'), 'wb') as f_out:
+            shutil.copyfileobj(f_in, f_out)
+    with gzip.open(filename_test, 'rb') as f_in:
+        with open(join(path, '1000_test.csv'), 'wb') as f_out:
+            shutil.copyfileobj(f_in, f_out)
     print('Processing...')
     trn, val, tst = load_data_no_discrete_normalised_as_array(path)
     print('Saving...')

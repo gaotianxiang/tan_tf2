@@ -106,7 +106,6 @@ def load_data_and_clean(file):
         col_name = data.columns[col_to_remove]
         data.drop(col_name, axis=1, inplace=True)
         B = get_correlation_numbers(data)
-    # print(data.corr())
     data = (data - data.mean()) / data.std()
 
     return data
@@ -132,7 +131,6 @@ def download_and_make_data(datapath):
     txtname = 'ethylene_CO.txt'
     path = os.path.join(datapath, 'gas/')
     os.makedirs(path, exist_ok=True)
-    # misc.make_path(path)
     print('Downloading...')
     filename = wget.download(url, path)
     filename = os.path.join(path, 'data.zip')
@@ -153,8 +151,4 @@ def download_and_make_data(datapath):
 
 
 if __name__ == '__main__':
-    # download_and_make_data('../datasets')
-    with open(os.path.join('../datasets', 'gas', 'gas.p'), 'rb') as file:
-        data = pickle.load(file)
-
-    print(type)
+    download_and_make_data('../datasets')

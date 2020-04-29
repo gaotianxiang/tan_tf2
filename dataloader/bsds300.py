@@ -1,5 +1,4 @@
 import numpy as np
-# import scipy.misc as misc
 import imageio
 import pickle
 import wget
@@ -37,16 +36,16 @@ def extract_patches(impath, step=2):
     img = imageio.imread(impath, as_gray=True).astype(np.float32)
     h, w = img.shape
     patches = []
-    for i in range(0, h-7, step):
-        for j in range(0, w-7, step):
-            patch = np.reshape(img[i:i+8, j:j+8], (64,)) + np.random.rand(64)
+    for i in range(0, h - 7, step):
+        for j in range(0, w - 7, step):
+            patch = np.reshape(img[i:i + 8, j:j + 8], (64,)) + np.random.rand(64)
             patches.append(patch)
     return np.array(patches)
 
 
 def process_images(imdir, extension='.jpg'):
     """ Extract all patches from images in a directory. """
-    impaths = glob.glob(os.path.join(imdir, '*'+extension))
+    impaths = glob.glob(os.path.join(imdir, '*' + extension))
     im_patches = [extract_patches(ip) for ip in impaths]
     return np.concatenate(im_patches, 0)
 
@@ -54,17 +53,17 @@ def process_images(imdir, extension='.jpg'):
 def make_dataset(bsds_imdir, save_path):
     # Load patches, rescale, demean, drop last pixel
     print('Loading training data...')
-    train_patches = process_images(os.path.join(bsds_imdir, 'train'))/256.0
+    train_patches = process_images(os.path.join(bsds_imdir, 'train')) / 256.0
     train_patches = train_patches - np.mean(train_patches, 1, keepdims=True)
     train_patches = train_patches[:, :-1].astype(np.float32)
     print('Loading testing data...')
-    test_patches = process_images(os.path.join(bsds_imdir, 'test'))/256.0
+    test_patches = process_images(os.path.join(bsds_imdir, 'test')) / 256.0
     test_patches = test_patches - np.mean(test_patches, 1, keepdims=True)
     test_patches = test_patches[:, :-1].astype(np.float32)
     # Split.
     N_train = train_patches.shape[0]
     train_perm = np.random.permutation(N_train)
-    N_valid = int(0.1*N_train)
+    N_valid = int(0.1 * N_train)
     # Save.
     pickle.dump(
         {'train': train_patches[train_perm[N_valid:]],
@@ -78,7 +77,6 @@ def download_and_make_data(datapath):
     url = ('https://www2.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/'
            'BSDS300-images.tgz')
     path = os.path.join(datapath, 'bsds/')
-    # umisc.make_path(path)
     os.makedirs(path, exist_ok=True)
     print('Downloading...')
     filename = wget.download(url, path)
@@ -90,6 +88,7 @@ def download_and_make_data(datapath):
     imgpath = os.path.join(path, 'BSDS300', 'images')
     savepath = os.path.join(path, 'bsds.p')
     make_dataset(imgpath, savepath)
+
 
 if __name__ == "__main__":
     download_and_make_data('../datasets')
