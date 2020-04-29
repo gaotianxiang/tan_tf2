@@ -1,11 +1,5 @@
 import tensorflow as tf
 import tensorflow.keras as tfk
-import datetime
-import numpy as np
-
-from module import transforms as trans
-from module.conditional import StandardNegativeGaussianLogLikelihoods, MixtureLogLikelihoods
-from dataloader import Power, Gas, Moon
 
 
 @tf.function
@@ -53,7 +47,7 @@ def train(model, loss_fn, optimizer, train_data, valid_data=None, test_data=None
                 if train_summary_writer is not None:
                     with train_summary_writer.as_default():
                         tf.summary.scalar('loss', loss, step=optimizer.iterations)
-                print('\tepoch {} step {} loss {}'.format(epoch, step, train_loss.result()))
+                print('\tepoch {} step {} loss {}'.format(epoch, step, loss))
         if train_summary_writer is not None:
             with train_summary_writer.as_default():
                 tf.summary.scalar('loss_epoch', train_loss.result(), step=epoch)
@@ -68,6 +62,3 @@ def train(model, loss_fn, optimizer, train_data, valid_data=None, test_data=None
             best_test_nll = loss_val
             if ckpt_manager is not None:
                 ckpt_manager.save()
-
-
-
