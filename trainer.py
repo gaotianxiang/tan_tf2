@@ -35,6 +35,25 @@ def val(model, loss_fn, data_loader):
 def train(model, loss_fn, optimizer, train_data, valid_data=None, test_data=None, num_epochs=100,
           train_summary_writer=None, valid_summary_writer=None, test_summary_writer=None,
           ckpt=None, ckpt_manager=None, log_interval=200):
+    """
+
+    Args:
+        model: tfk.Model trans.Transformer()
+        loss_fn: loss function RAM or STD Gaussian
+        optimizer: optimizer
+        train_data: tfd.dataset training data loader
+        valid_data: tfd.dataset valid data loader
+        test_data: tfd.dataset test data loader
+        num_epochs: int # of epochs
+        train_summary_writer: summary writer for training phase default to None (no log stored)
+        valid_summary_writer: summary writer for validation phase
+        test_summary_writer: summary writer for test phase
+        ckpt: tf checkpoint obj
+        ckpt_manager: tf checkpoint manager
+        log_interval: interval for printing info
+
+    Returns:
+    """
     best_test_nll = float('inf')
     train_loss = tfk.metrics.Mean()
     for epoch in range(num_epochs):
