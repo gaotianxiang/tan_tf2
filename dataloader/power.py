@@ -102,8 +102,8 @@ def download_and_make_data(datapath):
     txtname = 'household_power_consumption.txt'
     path = os.path.join(datapath, 'power/')
     os.makedirs(path, exist_ok=True)
-    # print('Downloading...')
-    # filename = wget.download(url, path)
+    print('Downloading...')
+    filename = wget.download(url, path)
     filename = os.path.join(path, 'household_power_consumption.zip')
     print('\nExtracting...')
     zip_ref = zipfile.ZipFile(filename, 'r')

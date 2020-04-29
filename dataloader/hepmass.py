@@ -16,7 +16,6 @@ import tensorflow as tf
 tfd = tf.data
 
 
-# from ..utils import misc
 
 class Hepmass:
     def __init__(self):
@@ -30,10 +29,6 @@ class Hepmass:
         train = data['train']
         valid = data['valid']
         test = data['test']
-        print(train.shape)
-        print(valid.shape)
-        print(test.shape)
-
         train = tfd.Dataset.from_tensor_slices(train).shuffle(100000).batch(batch_size, False).prefetch(
             tfd.experimental.AUTOTUNE)
         valid = tfd.Dataset.from_tensor_slices(valid).shuffle(100000).batch(batch_size, False).prefetch(
@@ -84,14 +79,14 @@ def load_data_no_discrete_normalised(path):
 
 def load_data_no_discrete_normalised_as_array(path):
     data_train, data_test = load_data_no_discrete_normalised(path)
-    data_train, data_test = data_train.as_matrix(), data_test.as_matrix()
+    data_train, data_test = data_train.values, data_test.values
 
     # Remove any features that have too many re-occurring real values.
     i = 0
     features_to_remove = []
     for feature in data_train.T:
         c = Counter(feature)
-        max_count = np.array([v for k, v in sorted(c.iteritems())])[0]
+        max_count = np.array([v for k, v in sorted(c.items())])[0]
         if max_count > 5:
             features_to_remove.append(i)
         i += 1
@@ -117,15 +112,15 @@ def download_and_make_data(datapath):
     os.makedirs(path, exist_ok=True)
     # misc.make_path(path)
     print('Downloading...')
-    filename_train = wget.download(url_train, path)
-    filename_test = wget.download(url_test, path)
+    # filename_train = wget.download(url_train, path)
+    # filename_test = wget.download(url_test, path)
     print('\nExtracting...')
-    with gzip.open(filename_train, 'rb') as f_in:
-        with open(join(path, '1000_train.csv'), 'wb') as f_out:
-            shutil.copyfileobj(f_in, f_out)
-    with gzip.open(filename_test, 'rb') as f_in:
-        with open(join(path, '1000_test.csv'), 'wb') as f_out:
-            shutil.copyfileobj(f_in, f_out)
+    # with gzip.open(filename_train, 'rb') as f_in:
+    #     with open(join(path, '1000_train.csv'), 'wb') as f_out:
+    #         shutil.copyfileobj(f_in, f_out)
+    # with gzip.open(filename_test, 'rb') as f_in:
+    #     with open(join(path, '1000_test.csv'), 'wb') as f_out:
+    #         shutil.copyfileobj(f_in, f_out)
     print('Processing...')
     trn, val, tst = load_data_no_discrete_normalised_as_array(path)
     print('Saving...')
