@@ -8,9 +8,8 @@ def train_step(model, loss_fn, optimizer, x_batch_data):
         transformed_x = model(x_batch_data, training=True)
         loss = loss_fn(transformed_x)
         loss += sum(model.losses)
-    grads = tape.gradient(loss, model.trainable_weights)
-
-    optimizer.apply_gradients(zip(grads, model.trainable_weights))
+    grads_model = tape.gradient(loss, model.trainable_weights + loss_fn.trainable_weights)
+    optimizer.apply_gradients(zip(grads_model, model.trainable_weights + loss_fn.trainable_weights))
     return loss
 
 

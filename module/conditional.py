@@ -39,12 +39,13 @@ class ConditionalParameters(tfk.layers.Layer):
 
 
 class MixtureLogLikelihoods(tfk.layers.Layer):
-    def __init__(self, num_components):
+    def __init__(self, num_components, rnn_hidden_size):
         super(MixtureLogLikelihoods, self).__init__()
         self.num_components = num_components
+        self.rnn_hidden_size = rnn_hidden_size
 
     def build(self, input_shape):
-        self.conditional = ConditionalParameters(self.num_components)
+        self.conditional = ConditionalParameters(self.num_components, self.rnn_hidden_size)
 
     def call(self, x, **kwargs):
         params = self.conditional(x)
