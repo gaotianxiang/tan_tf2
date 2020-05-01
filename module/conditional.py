@@ -18,16 +18,19 @@ class StandardNegativeGaussianLogLikelihoods(tfk.layers.Layer):
 
 
 class ConditionalParameters(tfk.layers.Layer):
-    def __init__(self, num_components):
+    def __init__(self, num_components, hidden_size=(256, 256)):
         super(ConditionalParameters, self).__init__()
         self.num_components = num_components
+        self.hidden_size = hidden_size
 
     def build(self, input_shape):
         dim = 3 * self.num_components
-        self.rnn = tfk.layers.GRU(units=dim, return_sequences=True)
+
+        layers = [tfk.layers.GRU(units=hs, return_sequences=True) for hs in self.hidden_size] + \
+                 [tfk.layers.GRU(units=dim, return_sequences=True)]
+        self.rnn = tfk.Sequential(layers)
 
     def call(self, x, **kwargs):
-        # x = tf.expand_dims(x, -1)
         n, d = x.get_shape()
         x = tf.concat((-tf.ones((n, 1)), x), axis=-1)[:, :-1]
         x = tf.expand_dims(x, -1)

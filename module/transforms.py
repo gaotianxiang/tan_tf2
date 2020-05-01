@@ -96,7 +96,8 @@ class FullyConnect(tfk.layers.Layer):
     def __init__(self, hidden_sizes, irange=None, activation=tfk.activations.relu):
         super(FullyConnect, self).__init__()
         self.hidden_sizes = hidden_sizes
-        self.initializer = tfk.initializers.RandomUniform(-irange, irange) if irange is not None else tfk.initializers.orthogonal
+        self.initializer = tfk.initializers.RandomUniform(-irange,
+                                                          irange) if irange is not None else tfk.initializers.orthogonal
         self.activation = activation
         self.fc = tfk.Sequential()
 
@@ -251,27 +252,29 @@ class LogitTransform(tfk.layers.Layer):
 
 
 class RNNAdditiveCoupling(tfk.layers.Layer):
-    def __init__(self):
+    def __init__(self, hidden_size):
         super(RNNAdditiveCoupling, self).__init__()
+        self.hidden_size = hidden_size
 
     def build(self, input_shape):
-        self.gru_cell = tfk.layers.GRUCell(units=1)
-        self.rnn = tfk.layers.RNN(self.gru_cell, return_sequences=True)
+        self.hidden_size = [hs for hs in self.hidden_size] + [1]
+        self.rnn = tfk.layers.RNN([tfk.layers.GRUCell(units=hs) for hs in self.hidden_size],
+                                  return_sequences=True, unroll=True)
+        self.cells = self.rnn.cell
 
     def call(self, x, reverse=False):
         n, d = x.get_shape()
         if reverse:
             z = tf.expand_dims(x, -1)
             res = []
-            inp = -tf.ones((n, 1, 1))
-            states = [tf.zeros((n, 1, 1))]
+            inp = -tf.ones((n, 1))
+            states = [tf.zeros((n, hs)) for hs in self.hidden_size]
             for i in range(d):
-                output, hidden = self.gru_cell(inp, states)
-                inp = tf.expand_dims(z[:, i], -1) - output
+                output, hidden = self.cells(inp, states)
+                inp = z[:, i] - output
                 states = hidden
                 res.append(inp)
             res = tf.concat(res, axis=1)
-            res = tf.squeeze(res, axis=-1)
             self.add_loss(0.0)
         else:
             z = tf.concat((-tf.ones((n, 1)), x), axis=-1)
@@ -284,25 +287,28 @@ class RNNAdditiveCoupling(tfk.layers.Layer):
 
 
 class RNNAffineCoupling(tfk.layers.Layer):
-    def __init__(self):
+    def __init__(self, hidden_size):
         super(RNNAffineCoupling, self).__init__()
+        self.hidden_size = hidden_size
 
     def build(self, input_shape):
-        self.gru_cell = tfk.layers.GRUCell(2)
-        self.rnn = tfk.layers.RNN(self.gru_cell, return_sequences=True)
+        self.hidden_size = [hs for hs in self.hidden_size] + [2]
+        self.rnn = tfk.layers.RNN([tfk.layers.GRUCell(units=hs) for hs in self.hidden_size],
+                                  return_sequences=True, unroll=True)
+        self.cells = self.rnn.cell
 
     def call(self, x, reverse=False):
         n, d = x.get_shape()
         if reverse:
             z = tf.expand_dims(x, axis=-1)
             res = []
-            inp = -tf.ones((n, 1, 1))
-            states = [tf.zeros((n, 1, 2))]
+            inp = -tf.ones((n, 1))
+            states = [tf.zeros((n, hs)) for hs in self.hidden_size]
             logdet = 0.0
             for i in range(d):
-                output, hidden = self.gru_cell(inp, states)
+                output, hidden = self.cells(inp, states)
                 log_scale, shift = tf.split(output, 2, axis=-1)
-                inp = (tf.expand_dims(z[:, i], -1) - shift) / tf.exp(log_scale)
+                inp = (z[:, i] - shift) / tf.exp(log_scale)
                 logdet += -tf.reduce_sum(log_scale)
                 states = hidden
                 res.append(inp)
