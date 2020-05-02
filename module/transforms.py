@@ -369,10 +369,13 @@ class Transformer(tfk.Model):
         pass
 
     def call(self, x, **kwargs):
-        # if reverse:
-        #     for transform in reversed(self.transformations):
-        #         x = transform(x, reverse=True)
-        # else:
         for transform in self.transformations:
             x = transform(x)
         return x
+
+    def generate(self, x):
+        for transform in reversed(self.transformations):
+            x = transform(x, reverse=True, training=False)
+
+        return x
+
