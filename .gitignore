@@ -2,3 +2,5 @@ datasets
 *.pyc
 .vscode
 .idea
+logs
+ckpts

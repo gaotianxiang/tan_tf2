@@ -1,6 +1,7 @@
 import tensorflow as tf
-import tensorflow.keras as tfk
 import numpy as np
+
+tfk = tf.keras
 
 
 class Reverse(tfk.layers.Layer):
@@ -97,7 +98,7 @@ class FullyConnect(tfk.layers.Layer):
         super(FullyConnect, self).__init__()
         self.hidden_sizes = hidden_sizes
         self.initializer = tfk.initializers.RandomUniform(-irange,
-                                                          irange) if irange is not None else tfk.initializers.orthogonal
+                                                          irange) if irange is not None else tfk.initializers.glorot_uniform
         self.activation = activation
         self.fc = tfk.Sequential()
 

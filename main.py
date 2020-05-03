@@ -42,9 +42,9 @@ def main():
     # ])
 
     # hyper parameters
-    batch_size = 256
+    batch_size = 64
     num_epochs = 100
-    initial_lr = 0.005
+    initial_lr = 0.001
     lr_decay_step = 5000
     lr_decay_rate = 0.5
     log_interval = 200
@@ -59,7 +59,7 @@ def main():
     dim = np.product(dtst.dim)
     mask = np.arange(dim) % 2
     mask = mask.astype(np.float32)
-    hidden = [32, 32]
+    hidden = [1024, 1024, 1024]
     model = trans.Transformer([
         trans.MaskAffineCoupling(hidden, mask),
         trans.MaskAffineCoupling(hidden, 1 - mask),
@@ -88,16 +88,17 @@ def main():
     ckpt_manager = tf.train.CheckpointManager(ckpt, os.path.join(ckpt_dir, repr(dtst)), max_to_keep=1)
 
     # define summary writer
-    train_summary = tf.summary.create_file_writer(os.path.join(summary_dir, 'train'))
-    val_summary = tf.summary.create_file_writer(os.path.join(summary_dir, 'val'))
-    test_summary = tf.summary.create_file_writer(os.path.join(summary_dir, 'test'))
+    train_summary = tf.summary.create_file_writer(os.path.join(summary_dir, repr(dtst), 'train'))
+    val_summary = tf.summary.create_file_writer(os.path.join(summary_dir, repr(dtst), 'val'))
+    test_summary = tf.summary.create_file_writer(os.path.join(summary_dir, repr(dtst), 'test'))
 
     # call function according to args.mode
     if args.mode is 'train':
         train(model, loss_fn, optim, train_dl, valid_dl,
               test_dl, num_epochs, train_summary, val_summary,
               test_summary, ckpt, ckpt_manager, log_interval=log_interval)
-    elif args.mode is 'gen':
+    elif args.mode == 'gen':
+        print('Generate {} num {}'.format(repr(dtst), args.num))
         generate(model, args.num, dtst.dim, test_summary, ckpt, ckpt_manager, restore=True)
 
 

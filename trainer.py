@@ -9,8 +9,10 @@ def train_step(model, loss_fn, optimizer, x_batch_data):
         transformed_x = model(x_batch_data, training=True)
         loss = loss_fn(transformed_x)
         loss += sum(model.losses)
-    grads_model = tape.gradient(loss, model.trainable_weights + loss_fn.trainable_weights)
-    optimizer.apply_gradients(zip(grads_model, model.trainable_weights + loss_fn.trainable_weights))
+    grads_model = tape.gradient(
+        loss, model.trainable_weights + loss_fn.trainable_weights)
+    optimizer.apply_gradients(
+        zip(grads_model, model.trainable_weights + loss_fn.trainable_weights))
     return loss
 
 
@@ -32,7 +34,6 @@ def val(model, loss_fn, data_loader):
     return loss_mean.result()
 
 
-@tf.function
 def generate(model, num, dim, summary_writer, ckpt, ckpt_manager, restore=False):
     if restore:
         ckpt.restore(ckpt_manager.latest_checkpoint)
@@ -45,7 +46,8 @@ def generate(model, num, dim, summary_writer, ckpt, ckpt_manager, restore=False)
     generated_images = tf.clip_by_value(generated_images, 0, 1)
 
     with summary_writer.as_default():
-        tf.summary.image('generated_image', generated_images, max_outputs=64, step=0)
+        tf.summary.image('generated_image', generated_images,
+                         max_outputs=64, step=0)
 
 
 def train(model, loss_fn, optimizer, train_data, valid_data=None, test_data=None, num_epochs=100,
@@ -95,6 +97,7 @@ def train(model, loss_fn, optimizer, train_data, valid_data=None, test_data=None
         print('\t Epoch - {} NLL {:.5f}'.format(epoch, loss_val))
 
         if loss_val < best_test_nll:
+            print('\t best eval loss - EPOCH {}'.format(epoch))
             best_test_nll = loss_val
             if ckpt_manager is not None:
                 ckpt_manager.save()
