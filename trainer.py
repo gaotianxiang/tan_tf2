@@ -1,5 +1,6 @@
 import tensorflow as tf
 import tensorflow.keras as tfk
+import numpy as np
 
 
 @tf.function
@@ -29,6 +30,22 @@ def val(model, loss_fn, data_loader):
         loss = val_step(model, loss_fn, x_batch_val)
         loss_mean.update_state(loss)
     return loss_mean.result()
+
+
+@tf.function
+def generate(model, num, dim, summary_writer, ckpt, ckpt_manager, restore=False):
+    if restore:
+        ckpt.restore(ckpt_manager.latest_checkpoint)
+
+    random_noise = tf.random.normal(shape=(num, np.product(dim)))
+    generated_images = model.generate(random_noise)
+    generated_images = tf.reshape(generated_images, shape=[-1] + dim)
+    generated_images += 1
+    generated_images /= 2
+    generated_images = tf.clip_by_value(generated_images, 0, 1)
+
+    with summary_writer.as_default():
+        tf.summary.image('generated_image', generated_images, max_outputs=64, step=0)
 
 
 def train(model, loss_fn, optimizer, train_data, valid_data=None, test_data=None, num_epochs=100,
@@ -76,6 +93,7 @@ def train(model, loss_fn, optimizer, train_data, valid_data=None, test_data=None
             with test_summary_writer.as_default():
                 tf.summary.scalar('loss_epoch', loss_val, step=epoch)
         print('\t Epoch - {} NLL {:.5f}'.format(epoch, loss_val))
+
         if loss_val < best_test_nll:
             best_test_nll = loss_val
             if ckpt_manager is not None:
