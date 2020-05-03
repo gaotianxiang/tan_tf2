@@ -7,7 +7,7 @@ tfk = tf.keras
 
 class MNIST:
     def __init__(self):
-        pass
+        self.dim = [28, 28, 1]
 
     def get_dl(self, batch_size):
         (x_train, y_train), (x_test, y_test) = tfk.datasets.mnist.load_data()
@@ -24,3 +24,6 @@ class MNIST:
         test = tfd.Dataset.from_tensor_slices(x_test).batch(batch_size).prefetch(tfd.experimental.AUTOTUNE)
 
         return train, None, test
+
+    def __repr__(self):
+        return 'mnist'
